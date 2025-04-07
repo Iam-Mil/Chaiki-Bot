@@ -5,6 +5,7 @@ from aiogram.types import CallbackQuery
 from aiogram import F
 
 from form import Forms, BasicForm
+from env import BOT_TOKEN
 
 import keyboards
 from aiogram.exceptions import TelegramBadRequest
@@ -13,7 +14,8 @@ router = Router()
 
 
 @router.message(CommandStart())
-async def welcome(message_or_callback: types.Message | types.CallbackQuery, bot: Bot):
+async def welcome(message_or_callback: types.Message | types.CallbackQuery, bot: Bot, state: FSMContext):
+    await state.clear()
     await bot.send_message(message_or_callback.from_user.id,
                            text='Привет, ты находишься в боте для создания чеков. Выбери нужный бренд из списка ниже:',
                            reply_markup=keyboards.get_brand_kb(1)
@@ -88,7 +90,7 @@ async def back_form_input(callback: types.CallbackQuery, bot: Bot, state: FSMCon
         await welcome(callback, bot)
 
 
-@router.callback_query(BasicForm.check_summary)
+@router.callback_query(BasicForm.check_summary, F.data.startswith('edit_'))
 async def edit_form(callback: types.CallbackQuery, bot: Bot, state: FSMContext):
     field_name = callback.data.replace('edit_', '')
 
@@ -120,6 +122,18 @@ async def get_form_input(message: types.Message, bot: Bot, state: FSMContext):
     proceed = False
     to_summary = False
 
+    if current_field.name == 'image':
+        if message.photo:
+            file_id = message.photo[-1].file_id
+            value = file_id
+
+            proceed = True
+
+        else:
+            await bot.send_message(message.from_user.id, 'Ошибка. Отправьте изображение')
+            await bot.send_message(message.from_user.id, current_field.message, reply_markup=keyboards.back_kb())
+            proceed = False
+
     if current_field.validators:
         for validator in current_field.validators:
             result = validator(value)
@@ -127,7 +141,7 @@ async def get_form_input(message: types.Message, bot: Bot, state: FSMContext):
                 proceed = True
             else:
                 await bot.send_message(message.from_user.id, result['error'])
-                await bot.send_message(message.from_user.id, current_field.message)
+                await bot.send_message(message.from_user.id, current_field.message, reply_markup=keyboards.back_kb())
                 proceed = False
                 break
 
@@ -155,10 +169,33 @@ async def get_form_input(message: types.Message, bot: Bot, state: FSMContext):
 
         fields = []
 
+        photo = None
+
         for key in data:
             if key.startswith('input_form_'):
-                summary += f'{key.replace("input_form_", "")}: {data[key]}\n'
+                if 'image' in key:
+                    photo = data[key]
+                else:
+                    summary += f'{key.replace("input_form_", "")}: {data[key]}\n'
+
                 fields.append(key.replace("input_form_", ""))
 
-        await bot.send_message(message.from_user.id, summary,
-                               reply_markup=keyboards.finish_kb(fields))
+        if photo:
+            await bot.send_photo(message.from_user.id, photo, caption=summary, reply_markup=keyboards.finish_kb(fields))
+        else:
+            await bot.send_message(message.from_user.id, summary, reply_markup=keyboards.finish_kb(fields))
+
+
+@router.callback_query(StateFilter(BasicForm.check_summary), F.data.startswith('cancel_generation'))
+async def cancel_generation(callback: types.CallbackQuery, bot: Bot, state: FSMContext):
+    await welcome(callback, bot, state)
+
+
+@router.callback_query(StateFilter(BasicForm.check_summary), F.data.startswith('finish_input'))
+async def finish_input(callback: types.CallbackQuery, bot: Bot, state: FSMContext):
+    data = await state.get_data()
+
+    photo_file_id = data.get('input_form_image')
+
+    photo_file = await bot.get_file(photo_file_id)
+    photo_file_url = f'https://api.telegram.org/file/bot{BOT_TOKEN}/{photo_file.file_path}'

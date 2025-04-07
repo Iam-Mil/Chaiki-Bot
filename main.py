@@ -1,3 +1,5 @@
+from env import BOT_TOKEN
+
 import asyncio
 import logging
 from aiogram import Router, Bot, Dispatcher
@@ -15,7 +17,7 @@ async def main():
     dp = Dispatcher(storage=MemoryStorage())
     dp.include_router(router)
 
-    bot = Bot(token='8005544784:AAFAkt5MxV8LGE-N27RapwW00owRaA8uJ7I')
+    bot = Bot(token=BOT_TOKEN)
 
     await dp.start_polling(bot)
 

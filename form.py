@@ -84,6 +84,10 @@ class Forms:
 adidas_form = Form(
     'adidas',
     [
+        Field('image',
+              'Отправьте фото продукта: ',
+              validators=[]
+              ),
         Field('name',
               'Введите имя покупателя: ',
               validators=[

@@ -57,3 +57,11 @@ def get_brand_kb(page):
             ])
 
     return kb
+
+
+def back_kb():
+    btn_back = InlineKeyboardButton(text='Назад', callback_data='back')
+
+    kb = InlineKeyboardMarkup(inline_keyboard=[[btn_back]])
+
+    return kb

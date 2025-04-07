@@ -18,6 +18,8 @@ def get_brand_kb(page):
     btn_gucci = InlineKeyboardButton(text='Gucci', callback_data='brand_gucci')
     btn_stussy = InlineKeyboardButton(text='Stussy', callback_data='brand_stussy')
 
+    btn_continue = InlineKeyboardButton(text='Далее', callback_data='from_brand_continue')
+
     # Navigation buttons
     btn_to_1st_page = InlineKeyboardButton(text='1 страница', callback_data='page_1')
     btn_to_2nd_page = InlineKeyboardButton(text='2 страница', callback_data='page_2')
@@ -29,25 +31,37 @@ def get_brand_kb(page):
                 [btn_stockx, btn_sephora],
                 [btn_nordstrom, btn_grailed],
                 [btn_amazon, btn_ebay],
-                [btn_to_1st_page, btn_to_2nd_page, btn_to_3rd_page]
+                [btn_to_1st_page, btn_to_2nd_page, btn_to_3rd_page],
+                [btn_continue]
             ])
         case 2:
             kb = InlineKeyboardMarkup(inline_keyboard=[
                 [btn_lv, btn_dior],
                 [btn_end, btn_goat_v1],
                 [btn_goat_v2, btn_nike],
-                [btn_to_1st_page, btn_to_2nd_page, btn_to_3rd_page]
+                [btn_to_1st_page, btn_to_2nd_page, btn_to_3rd_page],
+                [btn_continue]
             ])
         case 3:
             kb = InlineKeyboardMarkup(inline_keyboard=[
                 [btn_adidas],
                 [btn_gucci],
                 [btn_stussy],
-                [btn_to_1st_page, btn_to_2nd_page, btn_to_3rd_page]
+                [btn_to_1st_page, btn_to_2nd_page, btn_to_3rd_page],
+                [btn_continue]
             ])
         case _:
             kb = InlineKeyboardMarkup(inline_keyboard=[
-                [btn_to_1st_page, btn_to_2nd_page, btn_to_3rd_page]
+                [btn_to_1st_page, btn_to_2nd_page, btn_to_3rd_page],
+                [btn_continue]
             ])
+
+    return kb
+
+
+def back_kb():
+    btn_back = InlineKeyboardButton(text='Назад', callback_data='back')
+
+    kb = InlineKeyboardMarkup(inline_keyboard=[[btn_back]])
 
     return kb

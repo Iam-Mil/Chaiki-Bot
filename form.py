@@ -2,6 +2,10 @@ import re
 from aiogram.fsm.state import State, StatesGroup
 
 
+class BasicForm(StatesGroup):
+    check_summary = State()
+
+
 class Field:
     def __init__(self, name, message, validators=None, state=None):
         self.name = name

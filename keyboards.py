@@ -65,3 +65,18 @@ def back_kb():
     kb = InlineKeyboardMarkup(inline_keyboard=[[btn_back]])
 
     return kb
+
+
+def finish_kb(fields):
+    btn_continue = InlineKeyboardButton(text='Отправить чек', callback_data='finish_input')
+    btn_cancel = InlineKeyboardButton(text='Отменить', callback_data='cancel_generation')
+
+    field_btns = [[InlineKeyboardButton(text=field, callback_data=f'edit_{field}')] for field in fields]
+
+    kb = InlineKeyboardMarkup(inline_keyboard=[
+        *field_btns,
+        [btn_continue],
+        [btn_cancel]
+    ])
+
+    return kb
